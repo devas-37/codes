@@ -1,0 +1,32 @@
+server {
+	client_max_body_size 128M;
+    server_name todo.site;
+
+    set $base_root /var/www/todo.site/web;
+    root $base_root;
+
+    charset UTF-8;
+    index index.php index.html;
+
+    location / {
+    rewrite ^/(.*)$ /index.php?r=$1;
+        #try_files $uri $uri/ /web/index.php$is_args$args;
+	
+        location ~ ^/assets/.+\.php(/|$) {
+            deny all;
+        }
+    }
+
+
+    location ~* \.php$ {
+    	include /etc/nginx/fastcgi_params;
+        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+        
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        try_files $fastcgi_script_name =404;
+    }
+
+    location ~ /\. {
+        deny all;
+    }
+}
